@@ -17,11 +17,12 @@ const allowedOrigins=new Set(['http://127.0.0.1:8790','http://localhost:8790']);
 if(process.env.RENDER_EXTERNAL_URL)allowedOrigins.add(new URL(process.env.RENDER_EXTERNAL_URL).origin);
 if(process.env.PUBLIC_URL)allowedOrigins.add(new URL(process.env.PUBLIC_URL).origin);
 const server=http.createServer(async(req,res)=>{
+ const pathname=new URL(req.url,'http://localhost').pathname;
  const origin=req.headers.origin;
  if(origin&&!allowedOrigins.has(origin))return json(res,403,{error:'Yêu cầu không được phép.'});
- if(req.method==='GET'&&req.url==='/'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});return res.end(fs.readFileSync(path.join(dir,'index.html')));}
- if(req.method==='GET'&&req.url==='/health')return json(res,200,{configured:!!key});
- if(req.method!=='POST'||req.url!=='/api/chat')return json(res,404,{error:'Không tìm thấy trang.'});
+ if(req.method==='GET'&&pathname==='/'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});return res.end(fs.readFileSync(path.join(dir,'index.html')));}
+ if(req.method==='GET'&&pathname==='/health')return json(res,200,{configured:!!key});
+ if(req.method!=='POST'||pathname!=='/api/chat')return json(res,404,{error:'Không tìm thấy trang.'});
  if(!key)return json(res,503,{error:'Chưa tìm thấy khóa API trong cấu hình máy chủ.'});
  if(active>=4)return json(res,429,{error:'Đang có nhiều bạn trò chuyện. Bạn chờ một chút rồi gửi lại nhé.'});
  const today=new Date().toISOString().slice(0,10);
